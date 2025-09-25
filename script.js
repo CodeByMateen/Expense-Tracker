@@ -14,6 +14,7 @@ class ExpenseTracker {
         const expenseForm = document.getElementById('expenseForm');
         const saveJsonBtn = document.getElementById('saveJsonBtn');
         const saveXmlBtn = document.getElementById('saveXmlBtn');
+        const saveYamlBtn = document.getElementById('saveYamlBtn');
         const loadBtn = document.getElementById('loadBtn');
         const fileInput = document.getElementById('fileInput');
         const editForm = document.getElementById('editForm');
@@ -38,6 +39,7 @@ class ExpenseTracker {
         
         saveJsonBtn.addEventListener('click', () => this.saveToJSON());
         saveXmlBtn.addEventListener('click', () => this.saveToXML());
+        saveYamlBtn.addEventListener('click', () => this.saveToYAML());
         loadBtn.addEventListener('click', () => fileInput.click());
         fileInput.addEventListener('change', (e) => this.loadFromFile(e));
         
@@ -293,8 +295,10 @@ class ExpenseTracker {
                     data = JSON.parse(e.target.result);
                 } else if (fileName.endsWith('.xml')) {
                     data = this.xmlToObject(e.target.result);
+                } else if (fileName.endsWith('.yml') || fileName.endsWith('.yaml')) {
+                    data = this.yamlToObject(e.target.result);
                 } else {
-                    alert('Unsupported file format. Please use .json or .xml files.');
+                    alert('Unsupported file format. Please use .json, .xml, or .yaml files.');
                     return;
                 }
                 
@@ -367,6 +371,99 @@ class ExpenseTracker {
         });
         
         return { incomes, expenses };
+    }
+    
+    saveToYAML() {
+        const data = {
+            incomes: this.incomes,
+            expenses: this.expenses,
+            exportDate: new Date().toISOString(),
+            version: "1.0"
+        };
+        
+        const yamlContent = this.objectToYAML(data);
+        const blob = new Blob([yamlContent], { type: 'text/yaml' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `expense-tracker-${new Date().toISOString().split('T')[0]}.yml`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    
+    objectToYAML(obj) {
+        let yaml = `# Expense Tracker Export\n`;
+        yaml += `exportDate: "${obj.exportDate}"\n`;
+        yaml += `version: "${obj.version}"\n\n`;
+        
+        yaml += `incomes:\n`;
+        obj.incomes.forEach(income => {
+            yaml += `  - id: "${income.id}"\n`;
+            yaml += `    name: "${income.name.replace(/"/g, '\\"')}"\n`;
+            yaml += `    value: ${income.value}\n`;
+        });
+        
+        yaml += `\nexpenses:\n`;
+        obj.expenses.forEach(expense => {
+            yaml += `  - id: "${expense.id}"\n`;
+            yaml += `    name: "${expense.name.replace(/"/g, '\\"')}"\n`;
+            yaml += `    value: ${expense.value}\n`;
+        });
+        
+        return yaml;
+    }
+    
+    yamlToObject(yamlString) {
+        const lines = yamlString.split('\n');
+        const data = { incomes: [], expenses: [] };
+        let currentSection = null;
+        let currentItem = null;
+        
+        for (let line of lines) {
+            const trimmedLine = line.trim();
+            
+            // Skip comments and empty lines
+            if (trimmedLine.startsWith('#') || trimmedLine === '') {
+                continue;
+            }
+            
+            // Section headers
+            if (trimmedLine === 'incomes:') {
+                currentSection = 'incomes';
+                continue;
+            } else if (trimmedLine === 'expenses:') {
+                currentSection = 'expenses';
+                continue;
+            }
+            
+            // Item properties
+            if (trimmedLine.startsWith('- id:')) {
+                if (currentItem) {
+                    data[currentSection].push(currentItem);
+                }
+                currentItem = {
+                    id: trimmedLine.match(/- id: "(.+)"/)?.[1] || ''
+                };
+            } else if (trimmedLine.startsWith('name:')) {
+                if (currentItem) {
+                    currentItem.name = trimmedLine.match(/name: "(.+)"/)?.[1] || '';
+                }
+            } else if (trimmedLine.startsWith('value:')) {
+                if (currentItem) {
+                    currentItem.value = parseFloat(trimmedLine.match(/value: (.+)/)?.[1] || '0');
+                }
+            }
+        }
+        
+        // Add the last item
+        if (currentItem && currentSection) {
+            data[currentSection].push(currentItem);
+        }
+        
+        return data;
     }
     
 }
