@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Expense Tracker</h1>
+        
+        <div class="forms">
+            <div class="income-form">
+                <h2>Add Income</h2>
+                <form id="incomeForm">
+                    <input type="text" id="incomeName" placeholder="Income source" required>
+                    <input type="number" id="incomeValue" placeholder="Amount" step="0.01" required>
+                    <button type="submit">Add Income</button>
+                </form>
+            </div>
+            
+            <div class="expense-form">
+                <h2>Add Expense</h2>
+                <form id="expenseForm">
+                    <input type="text" id="expenseName" placeholder="Expense source" required>
+                    <input type="number" id="expenseValue" placeholder="Amount" step="0.01" required>
+                    <button type="submit">Add Expense</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="lists">
+            <div class="income-list">
+                <h2>Income</h2>
+                <ul id="incomeList"></ul>
+            </div>
+            
+            <div class="expense-list">
+                <h2>Expenses</h2>
+                <ul id="expenseList"></ul>
+            </div>
+        </div>
+        
+        <div class="summary">
+            <h2>Summary</h2>
+            <div class="totals">
+                <p>Total Income: ₳ <span id="totalIncome">0.00</span></p>
+                <p>Total Expenses: ₳ <span id="totalExpense">0.00</span></p>
+                <p class="net-amount">Net Amount: ₳ <span id="netAmount">0.00</span></p>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <h2>Data Management</h2>
+            <div class="action-buttons">
+                <button id="saveJsonBtn" class="action-btn">Save to JSON</button>
+                <button id="saveXmlBtn" class="action-btn">Save to XML</button>
+                <button id="loadBtn" class="action-btn">Load File</button>
+                <input type="file" id="fileInput" accept=".json,.xml" style="display: none;">
+            </div>
+        </div>
+        
+        <!-- Modal for editing -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Edit Record</h2>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="text" id="editName" placeholder="Name" required>
+                        <input type="number" id="editValue" placeholder="Amount" step="0.01" required>
+                        <div class="modal-buttons">
+                            <button type="submit" class="save-btn">Save Changes</button>
+                            <button type="button" class="cancel-btn">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
